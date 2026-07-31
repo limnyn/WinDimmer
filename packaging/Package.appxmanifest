@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MSIX 매니페스트 템플릿. __TOKEN__ 자리는 build-msix.ps1이 채운다.
+  Identity/Publisher는 Partner Center > 제품 관리 > 제품 ID 페이지의 값을 그대로 써야
+  Store 업로드가 통과된다. 로컬 테스트 빌드는 스크립트 기본값으로 충분하다.
+-->
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap desktop rescap">
+
+  <Identity Name="__IDENTITY_NAME__"
+            Publisher="__PUBLISHER__"
+            Version="__VERSION__"
+            ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>__DISPLAY_NAME__</DisplayName>
+    <PublisherDisplayName>__PUBLISHER_DISPLAY_NAME__</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="ko-kr" />
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="WinDimmer" Executable="WinDimmer.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="__DISPLAY_NAME__"
+                          Description="원하는 창만 골라 창마다 다른 밝기로 어둡게 만드는 트레이 유틸리티"
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <!-- TaskId는 src/WinDimmer/PackagedApp.cs의 StartupTaskId와 일치해야 한다 -->
+        <desktop:Extension Category="windows.startupTask" Executable="WinDimmer.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="WinDimmerStartup" Enabled="false" DisplayName="WinDimmer" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ABDBFAD4-43AD-404A-883E-FE00969B9A60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinDimmer", "src\WinDimmer\WinDimmer.csproj", "{F109C79A-D560-4440-ADE0-A3119AD5A4AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{691B611D-0B06-46A1-B8C4-7D1FE79CA46D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinDimmer.Tests", "tests\WinDimmer.Tests\WinDimmer.Tests.csproj", "{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F109C79A-D560-4440-ADE0-A3119AD5A4AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F109C79A-D560-4440-ADE0-A3119AD5A4AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F109C79A-D560-4440-ADE0-A3119AD5A4AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F109C79A-D560-4440-ADE0-A3119AD5A4AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F109C79A-D560-4440-ADE0-A3119AD5A4AB} = {ABDBFAD4-43AD-404A-883E-FE00969B9A60}
+		{7AC35ADD-9ECA-4F25-B3F2-985CE3FB61A2} = {691B611D-0B06-46A1-B8C4-7D1FE79CA46D}
+	EndGlobalSection
+EndGlobal

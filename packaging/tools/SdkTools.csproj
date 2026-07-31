@@ -1,0 +1,10 @@
+<!-- makeappx.exe 확보용 복원 전용 프로젝트. 빌드하지 않고 dotnet restore만 한다.
+     (Windows SDK를 설치하지 않은 환경에서 build-msix.ps1이 사용) -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.*" />
+  </ItemGroup>
+</Project>
