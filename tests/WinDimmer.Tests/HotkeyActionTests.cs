@@ -6,10 +6,11 @@ public class HotkeyActionTests
     [Fact]
     public void All_lists_every_action()
     {
-        Assert.Equal(5, HotkeyActions.All.Count);
+        Assert.Equal(6, HotkeyActions.All.Count);
         Assert.Contains(HotkeyAction.Toggle, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Brighter, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Darker, HotkeyActions.All);
+        Assert.Contains(HotkeyAction.Blackout, HotkeyActions.All);
         Assert.Contains(HotkeyAction.ClearAll, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Pick, HotkeyActions.All);
     }
@@ -69,5 +70,18 @@ public class HotkeyActionTests
     public void Pick_config_key_is_camel_case()
     {
         Assert.Equal("pick", HotkeyActions.ConfigKey(HotkeyAction.Pick));
+    }
+
+    [Fact]
+    public void Blackout_default_is_ctrl_alt_right()
+    {
+        // 밝기 조절(↑/↓)과 같은 화살표 무리 — 오른쪽은 "덮는다"
+        Assert.Equal("Ctrl+Alt+Right", HotkeyActions.Default(HotkeyAction.Blackout).Format());
+    }
+
+    [Fact]
+    public void Blackout_config_key_is_camel_case()
+    {
+        Assert.Equal("blackout", HotkeyActions.ConfigKey(HotkeyAction.Blackout));
     }
 }

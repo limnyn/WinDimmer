@@ -18,6 +18,7 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
     private readonly WindowPicker _picker;
     private readonly ContextMenuStrip _menu;
     private readonly ToolStripMenuItem _brightnessMenuItem;
+    private readonly ToolStripMenuItem _blackoutMenuItem;
     private readonly ToolStripMenuItem _clearAllMenuItem;
     private readonly HotkeyWindow _hotkeys;
     private readonly RuleWatcher _watcher;
@@ -50,12 +51,14 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
         _alphaRamp = new AlphaRamp();
 
         _brightnessMenuItem = new ToolStripMenuItem(string.Empty) { Enabled = false };
+        _blackoutMenuItem = new ToolStripMenuItem(string.Empty) { Enabled = false };
         _clearAllMenuItem = new ToolStripMenuItem(string.Empty) { Enabled = false };
 
         _menu = new ContextMenuStrip();
         _menu.Items.Add(new ToolStripMenuItem("창 선택", null, (_, _) => StartDimPick()));
         _menu.Items.Add(new ToolStripMenuItem("설정…", null, (_, _) => ShowSettings()));
         _menu.Items.Add(_brightnessMenuItem);
+        _menu.Items.Add(_blackoutMenuItem);
         _menu.Items.Add(_clearAllMenuItem);
         _menu.Items.Add(new ToolStripMenuItem("진단 정보 복사", null, (_, _) => CopyDiagnostics()));
         _menu.Items.Add(new ToolStripSeparator());
@@ -231,6 +234,9 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
                 break;
             case HotkeyAction.Darker:
                 BeginAlphaRamp(action, AlphaMath.Step);
+                break;
+            case HotkeyAction.Blackout:
+                _manager.ToggleBlackout(User32.GetForegroundWindow());
                 break;
             case HotkeyAction.ClearAll:
                 ReleaseAll();
@@ -458,6 +464,7 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
         // hotkeys는 "실제로 등록된" 조합이므로 등록에 실패한 동작이 빠져 있을 수 있다.
         _brightnessMenuItem.Text =
             $"밝기: {DisplayFor(hotkeys, HotkeyAction.Brighter)} / {DisplayFor(hotkeys, HotkeyAction.Darker)}";
+        _blackoutMenuItem.Text = $"완전 가림: {DisplayFor(hotkeys, HotkeyAction.Blackout)}";
         _clearAllMenuItem.Text = $"전체 해제: {DisplayFor(hotkeys, HotkeyAction.ClearAll)}";
     }
 

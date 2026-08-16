@@ -27,6 +27,13 @@ internal sealed class DimSession : IDisposable
     /// 이 창은 따라가지 않는다 — 창마다 맞춰 둔 값이 전역 조작 한 번에 지워지지 않게 하는 표시다.
     /// </summary>
     public bool AlphaIsCustom { get; private set; }
+
+    /// <summary>
+    /// 완전 가림(블랙아웃) 중이면 가리기 직전 상태의 기억, 아니면 null.
+    /// 세션이 소유하므로 세션이 끝나면 기억도 함께 사라진다 — 별도 정리가 필요 없다.
+    /// </summary>
+    public BlackoutMemory? Blackout { get; private set; }
+
     public bool IsElevatedTarget { get; }
     public bool HooksRegistered => _tracker.HooksRegistered;
 
@@ -72,9 +79,39 @@ internal sealed class DimSession : IDisposable
     /// </param>
     public void SetAlpha(byte alpha, bool custom)
     {
+        // 가림 중에 다른 경로(밝기 핫키·창별 슬라이더)로 밝기를 바꾸면 가림 기억은 버린다 —
+        // 이 창은 이제 "가림 중"이 아니라 "사용자가 직접 조절한 창"이다. 다음 가림 토글은
+        // 이 시점의 밝기를 새로 기억한다.
+        Blackout = null;
+
         Alpha = alpha;
         if (custom) AlphaIsCustom = true;
         _overlay.ApplyAlpha(alpha);
+    }
+
+    /// <summary>
+    /// 완전 가림 진입. 직전 상태를 기억하고 255로 덮는다. 가림은 개별지정 취급이다 —
+    /// 기본 밝기 슬라이더가 가림 중인 창을 끌어내리면 안 되기 때문이다.
+    /// </summary>
+    public void EnterBlackout(BlackoutMemory memory)
+    {
+        Blackout = memory;
+        Alpha = BlackoutPlan.CoverAlpha;
+        AlphaIsCustom = true;
+        _overlay.ApplyAlpha(Alpha);
+    }
+
+    /// <summary>완전 가림 해제. 기억해 둔 밝기와 개별지정 여부를 그대로 되돌린다.</summary>
+    public void ExitBlackout()
+    {
+        if (Blackout is not BlackoutMemory memory) return;
+
+        Blackout = null;
+        Alpha = memory.PrevAlpha;
+        // SetAlpha와 달리 개별지정 표시를 끌어내릴 수도 있어야 한다 — 가림이 세워 둔 표시를
+        // 원래(기본 밝기를 따르던 상태)로 되돌리는 경우다.
+        AlphaIsCustom = memory.PrevCustom;
+        _overlay.ApplyAlpha(Alpha);
     }
 
     private void OnForegroundChanged()

@@ -91,6 +91,35 @@ internal sealed class DimManager : IDisposable
         else TryDim(target, alpha);
     }
 
+    /// <summary>
+    /// 완전 가림 토글 (설계 문서 2026-08-16 §2). 디밍 안 된 창은 세션을 만들어 255로 가리고,
+    /// 가림 중이면 직전 상태로 되돌린다 — 가림이 만든 세션은 통째로 해제해 흔적을 없앤다.
+    /// 자동 복원 목록에는 관여하지 않는다: 가림은 재시작하면 사라지는 휘발성 상태다.
+    /// </summary>
+    public bool ToggleBlackout(IntPtr target)
+    {
+        DimSession? session = Find(target);
+        switch (BlackoutPlan.Next(session is not null, session?.Blackout))
+        {
+            case BlackoutOp.StartNew:
+                if (!TryDim(target, BlackoutPlan.CoverAlpha)) return false;
+                // TryDim이 true를 돌려도 시작 도중 대상이 죽어 세션이 이미 사라졌을 수 있다 —
+                // Find로 다시 확인한다. PrevAlpha/PrevCustom은 Release 경로에서 쓰지 않는다.
+                Find(target)?.EnterBlackout(new BlackoutMemory(0, false, CreatedByBlackout: true));
+                return true;
+            case BlackoutOp.Cover:
+                session!.EnterBlackout(new BlackoutMemory(session.Alpha, session.AlphaIsCustom, CreatedByBlackout: false));
+                return true;
+            case BlackoutOp.Release:
+                return Undim(target);
+            case BlackoutOp.Restore:
+                session!.ExitBlackout();
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /// <summary>디밍 중인 창의 세션을 찾는다. 디밍 중이 아니면 null.</summary>
     public DimSession? Find(IntPtr target) =>
         _sessions.TryGetValue(target, out DimSession? session) ? session : null;
