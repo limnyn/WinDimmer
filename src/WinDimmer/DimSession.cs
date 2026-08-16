@@ -29,10 +29,10 @@ internal sealed class DimSession : IDisposable
     public bool AlphaIsCustom { get; private set; }
 
     /// <summary>
-    /// 완전 가림(블랙아웃) 중이면 가리기 직전 상태의 기억, 아니면 null.
+    /// 오버라이드(완전 가림·디밍 걷기) 중이면 현재 종류와 직전 상태의 기억, 아니면 null.
     /// 세션이 소유하므로 세션이 끝나면 기억도 함께 사라진다 — 별도 정리가 필요 없다.
     /// </summary>
-    public BlackoutMemory? Blackout { get; private set; }
+    public OverrideState? Override { get; private set; }
 
     public bool IsElevatedTarget { get; }
     public bool HooksRegistered => _tracker.HooksRegistered;
@@ -79,10 +79,10 @@ internal sealed class DimSession : IDisposable
     /// </param>
     public void SetAlpha(byte alpha, bool custom)
     {
-        // 가림 중에 다른 경로(밝기 핫키·창별 슬라이더)로 밝기를 바꾸면 가림 기억은 버린다 —
-        // 이 창은 이제 "가림 중"이 아니라 "사용자가 직접 조절한 창"이다. 다음 가림 토글은
+        // 오버라이드 중에 다른 경로(밝기 핫키·창별 슬라이더)로 밝기를 바꾸면 기억은 버린다 —
+        // 이 창은 이제 "가림/걷기 중"이 아니라 "사용자가 직접 조절한 창"이다. 다음 토글은
         // 이 시점의 밝기를 새로 기억한다.
-        Blackout = null;
+        Override = null;
 
         Alpha = alpha;
         if (custom) AlphaIsCustom = true;
@@ -90,27 +90,37 @@ internal sealed class DimSession : IDisposable
     }
 
     /// <summary>
-    /// 완전 가림 진입. 직전 상태를 기억하고 255로 덮는다. 가림은 개별지정 취급이다 —
-    /// 기본 밝기 슬라이더가 가림 중인 창을 끌어내리면 안 되기 때문이다.
+    /// 오버라이드 진입. 직전 상태를 기억하고 극단 알파(가림 255 / 걷기 0)를 적용한다.
+    /// 오버라이드는 개별지정 취급이다 — 기본 밝기 슬라이더가 끌어내리면 안 되기 때문이다.
     /// </summary>
-    public void EnterBlackout(BlackoutMemory memory)
+    public void EnterOverride(OverrideKind kind, OverrideMemory memory)
     {
-        Blackout = memory;
-        Alpha = BlackoutPlan.CoverAlpha;
+        Override = new OverrideState(kind, memory);
+        Alpha = DimOverridePlan.AlphaFor(kind);
         AlphaIsCustom = true;
         _overlay.ApplyAlpha(Alpha);
     }
 
-    /// <summary>완전 가림 해제. 기억해 둔 밝기와 개별지정 여부를 그대로 되돌린다.</summary>
-    public void ExitBlackout()
+    /// <summary>가림↔걷기 전환. 기억은 그대로 두고 극단 알파만 바꾼다.</summary>
+    public void SwitchOverride(OverrideKind kind)
     {
-        if (Blackout is not BlackoutMemory memory) return;
+        if (Override is not OverrideState state) return;
 
-        Blackout = null;
-        Alpha = memory.PrevAlpha;
-        // SetAlpha와 달리 개별지정 표시를 끌어내릴 수도 있어야 한다 — 가림이 세워 둔 표시를
-        // 원래(기본 밝기를 따르던 상태)로 되돌리는 경우다.
-        AlphaIsCustom = memory.PrevCustom;
+        Override = state with { Kind = kind };
+        Alpha = DimOverridePlan.AlphaFor(kind);
+        _overlay.ApplyAlpha(Alpha);
+    }
+
+    /// <summary>오버라이드 해제. 기억해 둔 밝기와 개별지정 여부를 그대로 되돌린다.</summary>
+    public void ExitOverride()
+    {
+        if (Override is not OverrideState state) return;
+
+        Override = null;
+        Alpha = state.Memory.PrevAlpha;
+        // SetAlpha와 달리 개별지정 표시를 끌어내릴 수도 있어야 한다 — 오버라이드가 세워 둔
+        // 표시를 원래(기본 밝기를 따르던 상태)로 되돌리는 경우다.
+        AlphaIsCustom = state.Memory.PrevCustom;
         _overlay.ApplyAlpha(Alpha);
     }
 

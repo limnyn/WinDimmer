@@ -92,29 +92,36 @@ internal sealed class DimManager : IDisposable
     }
 
     /// <summary>
-    /// 완전 가림 토글 (설계 문서 2026-08-16 §2). 디밍 안 된 창은 세션을 만들어 255로 가리고,
-    /// 가림 중이면 직전 상태로 되돌린다 — 가림이 만든 세션은 통째로 해제해 흔적을 없앤다.
-    /// 자동 복원 목록에는 관여하지 않는다: 가림은 재시작하면 사라지는 휘발성 상태다.
+    /// 완전 가림(Cover)·디밍 걷기(Lift) 토글 (설계 문서 2026-08-16 §2·부록 A).
+    /// 가림은 디밍 안 된 창에도 세션을 만들어 덮지만, 걷기는 걷을 필터가 있어야 의미가
+    /// 있으므로 미디밍 창에서는 아무것도 하지 않는다. 오버라이드가 만든 세션은 어느 키로든
+    /// 통째로 해제되어 흔적을 남기지 않는다. 자동 복원 목록에는 관여하지 않는다:
+    /// 오버라이드는 재시작하면 사라지는 휘발성 상태다.
     /// </summary>
-    public bool ToggleBlackout(IntPtr target)
+    public bool ToggleOverride(IntPtr target, OverrideKind pressed)
     {
         DimSession? session = Find(target);
-        switch (BlackoutPlan.Next(session is not null, session?.Blackout))
+        switch (DimOverridePlan.Next(pressed, session is not null, session?.Override))
         {
-            case BlackoutOp.StartNew:
-                if (!TryDim(target, BlackoutPlan.CoverAlpha)) return false;
+            case OverrideOp.Start:
+                if (!TryDim(target, DimOverridePlan.CoverAlpha)) return false;
                 // TryDim이 true를 돌려도 시작 도중 대상이 죽어 세션이 이미 사라졌을 수 있다 —
                 // Find로 다시 확인한다. PrevAlpha/PrevCustom은 Release 경로에서 쓰지 않는다.
-                Find(target)?.EnterBlackout(new BlackoutMemory(0, false, CreatedByBlackout: true));
+                Find(target)?.EnterOverride(
+                    OverrideKind.Cover, new OverrideMemory(0, false, CreatedByOverride: true));
                 return true;
-            case BlackoutOp.Cover:
-                session!.EnterBlackout(new BlackoutMemory(session.Alpha, session.AlphaIsCustom, CreatedByBlackout: false));
+            case OverrideOp.Enter:
+                session!.EnterOverride(
+                    pressed, new OverrideMemory(session.Alpha, session.AlphaIsCustom, CreatedByOverride: false));
                 return true;
-            case BlackoutOp.Release:
+            case OverrideOp.Switch:
+                session!.SwitchOverride(pressed);
+                return true;
+            case OverrideOp.Restore:
+                session!.ExitOverride();
+                return true;
+            case OverrideOp.Release:
                 return Undim(target);
-            case BlackoutOp.Restore:
-                session!.ExitBlackout();
-                return true;
             default:
                 return false;
         }

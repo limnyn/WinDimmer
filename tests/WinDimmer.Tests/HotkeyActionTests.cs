@@ -6,11 +6,12 @@ public class HotkeyActionTests
     [Fact]
     public void All_lists_every_action()
     {
-        Assert.Equal(6, HotkeyActions.All.Count);
+        Assert.Equal(7, HotkeyActions.All.Count);
         Assert.Contains(HotkeyAction.Toggle, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Brighter, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Darker, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Blackout, HotkeyActions.All);
+        Assert.Contains(HotkeyAction.Lift, HotkeyActions.All);
         Assert.Contains(HotkeyAction.ClearAll, HotkeyActions.All);
         Assert.Contains(HotkeyAction.Pick, HotkeyActions.All);
     }
@@ -80,8 +81,21 @@ public class HotkeyActionTests
     }
 
     [Fact]
+    public void Lift_default_is_ctrl_alt_left()
+    {
+        // 왼쪽은 "걷는다" — 가림(→)의 반대 방향
+        Assert.Equal("Ctrl+Alt+Left", HotkeyActions.Default(HotkeyAction.Lift).Format());
+    }
+
+    [Fact]
     public void Blackout_config_key_is_camel_case()
     {
         Assert.Equal("blackout", HotkeyActions.ConfigKey(HotkeyAction.Blackout));
+    }
+
+    [Fact]
+    public void Lift_config_key_is_camel_case()
+    {
+        Assert.Equal("lift", HotkeyActions.ConfigKey(HotkeyAction.Lift));
     }
 }

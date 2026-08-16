@@ -17,6 +17,9 @@ public enum HotkeyAction
     /// <summary>대상 창 완전 가림 토글 — 255로 덮거나 직전 상태로 복귀.</summary>
     Blackout,
 
+    /// <summary>대상 창 디밍 걷기 토글 — 필터를 걷어(0) 원본을 보거나 직전 상태로 복귀.</summary>
+    Lift,
+
     /// <summary>모든 디밍 해제.</summary>
     ClearAll,
 
@@ -34,6 +37,7 @@ public static class HotkeyActions
         HotkeyAction.Brighter,
         HotkeyAction.Darker,
         HotkeyAction.Blackout,
+        HotkeyAction.Lift,
         HotkeyAction.ClearAll,
         HotkeyAction.Pick,
     });
@@ -45,6 +49,7 @@ public static class HotkeyActions
         HotkeyAction.Brighter => "밝게",
         HotkeyAction.Darker => "어둡게",
         HotkeyAction.Blackout => "완전 가림 토글",
+        HotkeyAction.Lift => "디밍 걷기 토글",
         HotkeyAction.ClearAll => "전체 해제",
         HotkeyAction.Pick => "창 선택",
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),
@@ -57,8 +62,9 @@ public static class HotkeyActions
         HotkeyAction.Toggle => new HotkeySpec(Keys.Control | Keys.Alt | Keys.D),
         HotkeyAction.Brighter => new HotkeySpec(Keys.Control | Keys.Alt | Keys.Up),
         HotkeyAction.Darker => new HotkeySpec(Keys.Control | Keys.Alt | Keys.Down),
-        // 밝기 조절(↑/↓)과 같은 화살표 무리에 두되, 오른쪽은 "덮는다"는 별개 동작.
+        // 밝기 조절(↑/↓)과 같은 화살표 무리 — 오른쪽은 "덮고", 왼쪽은 "걷는다".
         HotkeyAction.Blackout => new HotkeySpec(Keys.Control | Keys.Alt | Keys.Right),
+        HotkeyAction.Lift => new HotkeySpec(Keys.Control | Keys.Alt | Keys.Left),
         HotkeyAction.ClearAll => new HotkeySpec(Keys.Control | Keys.Alt | Keys.X),
         HotkeyAction.Pick => new HotkeySpec(Keys.Control | Keys.Alt | Keys.T),
         _ => throw new ArgumentOutOfRangeException(nameof(action), action, null),

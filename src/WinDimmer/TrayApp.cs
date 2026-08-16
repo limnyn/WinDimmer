@@ -236,7 +236,10 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
                 BeginAlphaRamp(action, AlphaMath.Step);
                 break;
             case HotkeyAction.Blackout:
-                _manager.ToggleBlackout(User32.GetForegroundWindow());
+                _manager.ToggleOverride(User32.GetForegroundWindow(), OverrideKind.Cover);
+                break;
+            case HotkeyAction.Lift:
+                _manager.ToggleOverride(User32.GetForegroundWindow(), OverrideKind.Lift);
                 break;
             case HotkeyAction.ClearAll:
                 ReleaseAll();
@@ -464,7 +467,8 @@ internal sealed class TrayApp : IDisposable, IDimmedWindowsView
         // hotkeys는 "실제로 등록된" 조합이므로 등록에 실패한 동작이 빠져 있을 수 있다.
         _brightnessMenuItem.Text =
             $"밝기: {DisplayFor(hotkeys, HotkeyAction.Brighter)} / {DisplayFor(hotkeys, HotkeyAction.Darker)}";
-        _blackoutMenuItem.Text = $"완전 가림: {DisplayFor(hotkeys, HotkeyAction.Blackout)}";
+        _blackoutMenuItem.Text =
+            $"가림 / 걷기: {DisplayFor(hotkeys, HotkeyAction.Blackout)} / {DisplayFor(hotkeys, HotkeyAction.Lift)}";
         _clearAllMenuItem.Text = $"전체 해제: {DisplayFor(hotkeys, HotkeyAction.ClearAll)}";
     }
 
