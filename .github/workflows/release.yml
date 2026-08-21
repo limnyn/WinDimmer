@@ -31,11 +31,14 @@ jobs:
 
       # -p:Version을 태그에서 뽑아 넘긴다 — csproj의 <Version>을 안 올리고 태그만 밀어도
       # 트레이 메뉴·설정 창에 표시되는 버전이 태그와 일치하게.
+      # IncludeNativeLibrariesForSelfExtract가 없으면 WPF/WinForms의 네이티브 DLL 5개가
+      # exe 옆에 따로 떨어져 나와, exe만 옮기면 실행되지 않는다.
       - name: Publish (self-contained)
         shell: pwsh
         run: >
           dotnet publish src/WinDimmer/WinDimmer.csproj -c Release -r win-x64
           --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
           -p:DebugType=None -p:DebugSymbols=false
           "-p:Version=$($env:TAG -replace '^v','')" -o out/selfcontained
 
